@@ -1,18 +1,12 @@
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 import { images } from "@/constants";
-import { useAuthStore } from "@/store/auth.store";
 
 const CartButton = () => {
   const totalItems = 10;
 
-  const getToken = async () => {
-    const token = useAuthStore((state) => state.token);
-    console.log({ token });
-  };
-
   return (
-    <TouchableOpacity className="cart-btn" onPress={() => getToken()}>
+    <TouchableOpacity className="cart-btn" onPress={() => {}}>
       <Image source={images.bag} className="size-5" resizeMode="contain" />
 
       {totalItems > 0 && (

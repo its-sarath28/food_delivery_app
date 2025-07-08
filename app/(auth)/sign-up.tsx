@@ -30,7 +30,6 @@ const SignUp = () => {
       router.replace("/(tabs)");
     },
     onError: (err: any) => {
-      console.log(err?.response?.data);
       Alert.alert(
         "Sign up failed",
         Array.isArray(err?.response?.data?.message)

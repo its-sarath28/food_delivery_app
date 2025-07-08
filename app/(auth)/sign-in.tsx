@@ -25,7 +25,6 @@ const SignIn = () => {
       router.replace("/(tabs)");
     },
     onError: (err: any) => {
-      console.log(JSON.stringify(err));
       Alert.alert(
         "Sign up failed",
         err?.response?.data?.message || "Please try again"

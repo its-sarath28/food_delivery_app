@@ -1,21 +1,5 @@
 import { Models } from "react-native-appwrite";
 
-export interface MenuItem extends Models.Document {
-  name: string;
-  price: number;
-  image_url: string;
-  description: string;
-  calories: number;
-  protein: number;
-  rating: number;
-  type: string;
-}
-
-export interface Category extends Models.Document {
-  name: string;
-  description: string;
-}
-
 export interface User extends Models.Document {
   name: string;
   email: string;
@@ -104,4 +88,26 @@ interface SignInParams {
 interface GetMenuParams {
   category: string;
   query: string;
+}
+
+interface Menu {
+  id: number;
+  title: string;
+  imageUrl: string;
+  description?: string | null;
+  colorCode: string;
+}
+
+interface Category {
+  id: number;
+  name: string;
+}
+
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  available: boolean;
+  type: "Non-veg" | "Veg";
+  imageUrl: string;
 }

@@ -3,6 +3,7 @@ import {
   FlatList,
   Image,
   Pressable,
+  StatusBar,
   Text,
   TouchableOpacity,
   View,
@@ -12,13 +13,22 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import cn from "clsx";
 
 import CartButton from "@/components/CartButton";
-import { images, offers } from "@/constants";
+import { images } from "@/constants";
+import { useGetMenu } from "@/service/menu.service";
 
 export default function Index() {
+  const { data, isLoading } = useGetMenu();
+
   return (
     <SafeAreaView className="flex-1 bg-white">
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor="white"
+        translucent={false}
+      />
+
       <FlatList
-        data={offers}
+        data={data}
         renderItem={({ item, index }) => {
           const isEven: boolean = index % 2 === 0;
 
@@ -29,14 +39,14 @@ export default function Index() {
                   "offer-card",
                   isEven ? "flex-row-reverse" : "flex-row"
                 )}
-                style={{ backgroundColor: item.color }}
+                style={{ backgroundColor: item.colorCode }}
                 android_ripple={{ color: "#fffff22" }}
               >
                 {({ pressed }) => (
                   <Fragment>
                     <View className="h-full w-1/2">
                       <Image
-                        source={item.image}
+                        src={item.imageUrl}
                         className="size-full"
                         resizeMode="contain"
                       />
