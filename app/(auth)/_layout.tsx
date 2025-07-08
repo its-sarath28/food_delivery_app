@@ -1,4 +1,4 @@
-import { Slot } from "expo-router";
+import { Redirect, Slot } from "expo-router";
 import {
   Dimensions,
   Image,
@@ -10,8 +10,15 @@ import {
 } from "react-native";
 
 import { images } from "@/constants";
+import { useAuthStore } from "@/store/auth.store";
 
 export default function AuthLayout() {
+  const { isAuthenticated } = useAuthStore.getState();
+
+  if (isAuthenticated) {
+    <Redirect href="/(tabs)" />;
+  }
+
   return (
     <View
       style={{

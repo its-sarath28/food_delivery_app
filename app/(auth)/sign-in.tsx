@@ -5,28 +5,43 @@ import { Alert, Text, View } from "react-native";
 import CustomButton from "@/components/CustomButton";
 import CustomInput from "@/components/CustomInput";
 
+import { useSignIn } from "@/service/auth.service";
+
+import { useAuthStore } from "@/store/auth.store";
+
 const SignIn = () => {
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [form, setForm] = useState<{ email: string; password: string }>({
     email: "",
     password: "",
   });
 
-  const submit = async () => {
-    if (!form.email || !form.password) {
-      Alert.alert("Error", "Please enter your email and password");
+  const { setIsAuthenticated, setToken, setRefreshToken } = useAuthStore();
+
+  const { mutate, isPending } = useSignIn({
+    onSuccess: async (data) => {
+      setToken(data.accessToken);
+      setRefreshToken(data.refreshToken);
+      setIsAuthenticated(true);
+      router.replace("/(tabs)");
+    },
+    onError: (err: any) => {
+      console.log(JSON.stringify(err));
+      Alert.alert(
+        "Sign up failed",
+        err?.response?.data?.message || "Please try again"
+      );
+    },
+  });
+
+  const submit = () => {
+    const { email, password } = form;
+
+    if (!email || !password) {
+      Alert.alert("Error", "Please enter all details");
       return;
     }
 
-    setIsSubmitting(true);
-
-    try {
-      router.replace("/(tabs)");
-    } catch (err: any) {
-      Alert.alert("Error", err.messages);
-    } finally {
-      setIsSubmitting(false);
-    }
+    mutate(form);
   };
 
   return (
@@ -49,7 +64,7 @@ const SignIn = () => {
         secureTextEntry
       />
 
-      <CustomButton title="Sign In" onPress={submit} isLoading={isSubmitting} />
+      <CustomButton title="Sign In" onPress={submit} isLoading={isPending} />
 
       <View className="flex justify-center items-center mt-5 flex-row gap-2">
         <Text className="base-regular text-gray-100">

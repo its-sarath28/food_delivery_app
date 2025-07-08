@@ -1,10 +1,15 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
-import { SplashScreen, Stack } from "expo-router";
-
+import { Redirect, SplashScreen, Stack } from "expo-router";
 import { useEffect } from "react";
+
+import { useAuthStore } from "@/store/auth.store";
+
 import "./global.css";
 
 export default function RootLayout() {
+  const { isAuthenticated } = useAuthStore.getState();
+
   const [fontsLoaded, error] = useFonts({
     "Quicksand-Bold": require("@/assets/fonts/Quicksand-Bold.ttf"),
     "Quicksand-Light": require("@/assets/fonts/Quicksand-Light.ttf"),
@@ -18,5 +23,23 @@ export default function RootLayout() {
     if (fontsLoaded) SplashScreen.hideAsync();
   }, [fontsLoaded, error]);
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnReconnect: true,
+      },
+    },
+  });
+
+  isAuthenticated ? (
+    <Redirect href={"/(tabs)"} />
+  ) : (
+    <Redirect href={"/(auth)/sign-in"} />
+  );
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Stack screenOptions={{ headerShown: false }} />
+    </QueryClientProvider>
+  );
 }
