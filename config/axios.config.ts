@@ -9,32 +9,42 @@ import axios, {
 } from "axios";
 import { router } from "expo-router";
 
-function getAccessToken(): string | null {
-  const { token } = useAuthStore.getState();
-  return token;
-}
-
-function getRefreshToken(): string | null {
-  const { refreshToken } = useAuthStore.getState();
-  return refreshToken;
-}
-
-function setAccessToken(token: string) {
-  const { setToken } = useAuthStore.getState();
-  setToken(token);
-}
-
-function setRefreshToken(refreshToken: string) {
-  const { setRefreshToken } = useAuthStore.getState();
-  setRefreshToken(refreshToken);
-}
-
 const apiClient: AxiosInstance = axios.create({
   baseURL: BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
 });
+
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value?: AxiosResponse<any>) => void;
+  reject: (error?: any) => void;
+  originalRequest: AxiosRequestConfig & { _retry?: boolean };
+}> = [];
+
+const processQueue = async (error: any, token: string | null = null) => {
+  for (const prom of failedQueue) {
+    const { resolve, reject, originalRequest } = prom;
+
+    if (token) {
+      try {
+        originalRequest._retry = true;
+        originalRequest.headers = {
+          ...originalRequest.headers,
+          Authorization: `Bearer ${token}`,
+        };
+        const response = await apiClient(originalRequest);
+        resolve(response);
+      } catch (err) {
+        reject(err);
+      }
+    } else {
+      reject(error);
+    }
+  }
+  failedQueue = [];
+};
 
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
@@ -56,27 +66,42 @@ apiClient.interceptors.response.use(
       _retry?: boolean;
     };
 
+    const { refreshToken, setRefreshToken, setToken } = useAuthStore.getState();
+
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      getRefreshToken()
+      refreshToken
     ) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({
+            resolve,
+            reject,
+            originalRequest,
+          });
+        });
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
-        // Call your refresh endpoint
         const response = await axios.post(`${BASE_URL}/auth/refresh-token`, {
-          refreshToken: getRefreshToken(),
+          refreshToken,
         });
 
         const newAccessToken = response.data.accessToken;
         const newRefreshToken = response.data.refreshToken;
-        setAccessToken(newAccessToken);
+
+        setToken(newAccessToken);
         if (newRefreshToken) {
           setRefreshToken(newRefreshToken);
         }
 
-        // Retry original request with new token
+        processQueue(null, newAccessToken);
+        isRefreshing = false;
+
         originalRequest.headers = {
           ...originalRequest.headers,
           Authorization: `Bearer ${newAccessToken}`,
@@ -84,8 +109,8 @@ apiClient.interceptors.response.use(
 
         return apiClient(originalRequest);
       } catch (refreshError) {
-        console.error("Token refresh failed:", refreshError);
-
+        processQueue(refreshError, null);
+        isRefreshing = false;
         router.replace("/(auth)/sign-in");
         return Promise.reject(refreshError);
       }

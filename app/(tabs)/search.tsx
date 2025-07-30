@@ -1,6 +1,6 @@
 import cn from "clsx";
 import { useLocalSearchParams } from "expo-router";
-import { Dimensions, FlatList, Text, View } from "react-native";
+import { Dimensions, FlatList, Image, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import CartButton from "@/components/CartButton";
@@ -8,6 +8,7 @@ import CategoryFilter from "@/components/CategoryFilter";
 import ProductCard from "@/components/ProductCard";
 import SearchBar from "@/components/SearchBar";
 
+import { images } from "@/constants";
 import { useGetProduct } from "@/service/product.service";
 
 const Search = () => {
@@ -45,7 +46,7 @@ const Search = () => {
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
         columnWrapperClassName="gap-7"
-        contentContainerClassName="gap-7 px-5 pb-32"
+        contentContainerClassName="gap-7 px-5 pb-[15rem]"
         ListHeaderComponent={() => (
           <View className="my-5 gap-5">
             <View className="flex-between flex-row w-full">
@@ -69,7 +70,24 @@ const Search = () => {
             <CategoryFilter />
           </View>
         )}
-        ListEmptyComponent={() => !productLoading && <Text>No products</Text>}
+        ListEmptyComponent={() =>
+          !productLoading && (
+            <View className="justify-center items-center">
+              <Image
+                source={images.emptyState}
+                className="size-52"
+                resizeMode="contain"
+              />
+
+              <Text className="base-bold text-dark-100 mb-2">
+                Nothing matched your search
+              </Text>
+              <Text className="body-regular text-gray-200">
+                Try a different search term or check for typos.
+              </Text>
+            </View>
+          )
+        }
       />
     </SafeAreaView>
   );

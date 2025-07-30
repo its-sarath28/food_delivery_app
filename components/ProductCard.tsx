@@ -1,9 +1,13 @@
-import React from "react";
+import { router } from "expo-router";
 import { Image, Platform, Text, TouchableOpacity } from "react-native";
+
+import { useCartStore } from "@/store/cart.store";
 
 import { Product } from "@/type";
 
 const ProductCard = ({ item }: { item: Product }) => {
+  const { addItem } = useCartStore();
+
   return (
     <TouchableOpacity
       className="menu-card"
@@ -11,6 +15,12 @@ const ProductCard = ({ item }: { item: Product }) => {
         Platform.OS === "android"
           ? { elevation: 10, shadowColor: "#878787" }
           : {}
+      }
+      onPress={() =>
+        router.push({
+          pathname: "/product/[id]",
+          params: { id: item.id.toString() },
+        })
       }
     >
       <Image
@@ -30,7 +40,7 @@ const ProductCard = ({ item }: { item: Product }) => {
         From ₹{item.price}
       </Text>
 
-      <TouchableOpacity onPress={() => {}}>
+      <TouchableOpacity onPress={() => addItem(item)}>
         <Text className="paragraph-bold text-primary">Add to cart +</Text>
       </TouchableOpacity>
     </TouchableOpacity>

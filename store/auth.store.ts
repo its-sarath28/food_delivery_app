@@ -1,4 +1,3 @@
-import { User } from "@/type";
 import * as Keychain from "react-native-keychain";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -22,12 +21,12 @@ interface AuthStore {
   token: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
-  user: User | null;
+  user: any | null;
 
   setToken: (token: string) => void;
   setRefreshToken: (refreshToken: string) => void;
   setIsAuthenticated: (isAuthenticated: boolean) => void;
-  setUser: (user: User) => void;
+  setUser: (user: any) => void;
 
   clearStorage: () => void;
 }

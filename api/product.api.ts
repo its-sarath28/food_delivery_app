@@ -1,5 +1,5 @@
 import apiClient from "@/config/axios.config";
-import { Product } from "@/type";
+import { Product, ProductDetail } from "@/type";
 
 export const fetchProducts = async (
   categoryId?: string,
@@ -10,5 +10,12 @@ export const fetchProducts = async (
   if (query) params.append("query", query);
 
   const res = await apiClient.get<Product[]>(`/product?${params.toString()}`);
+  return res.data;
+};
+
+export const getProductDetail = async (
+  productId: string
+): Promise<ProductDetail> => {
+  const res = await apiClient.get<ProductDetail>(`/product/${productId}`);
   return res.data;
 };

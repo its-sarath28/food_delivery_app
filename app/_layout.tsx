@@ -27,6 +27,7 @@ export default function RootLayout() {
     defaultOptions: {
       queries: {
         refetchOnReconnect: true,
+        retry: 3,
       },
     },
   });
